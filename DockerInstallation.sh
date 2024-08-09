@@ -54,6 +54,7 @@ mirror_list_registry=(
     "腾讯云@mirror.ccs.tencentyun.com"
     "谷歌云@mirror.gcr.io"
     "官方 Docker Hub@registry.hub.docker.com"
+    "自建 cf大善人@docker.zzc.fit"
 )
 
 ## 定义系统判定变量
@@ -583,6 +584,22 @@ function install_dependency_packages() {
         esac
         ;;
     esac
+    ## 询问是否安装最新版本的 Docker Compose
+    local CHOICE_DOCKER_COMPOSE=$(echo -e "\n${BOLD}└─ 是否安装最新版本的 Docker Compose? [Y/n] ${PLAIN}")
+    read -p "${CHOICE_DOCKER_COMPOSE}" INPUT
+    [[ -z "${INPUT}" ]] && INPUT=Y
+    case $INPUT in
+    [Yy] | [Yy][Ee][Ss])
+        INSTALL_DOCKER_COMPOSE="true"
+        ;;
+    [Nn] | [Nn][Oo])
+        INSTALL_DOCKER_COMPOSE="false"
+        ;;
+    *)
+        echo -e "\n$WARN 输入错误，默认不安装！"
+        INSTALL_DOCKER_COMPOSE="false"
+        ;;
+    esac
 }
 
 ## 卸载 Docker Engine 原有版本软件包
@@ -667,6 +684,8 @@ function configure_docker_ce_mirror() {
             yum makecache
         fi
         ;;
+
+        
     esac
 }
 
@@ -836,12 +855,23 @@ function install_docker_engine() {
     else
         uninstall_original_version
         install_main
+        install_docker_compose
     fi
     change_docker_registry_mirror
     systemctl stop docker >/dev/null 2>&1
     systemctl enable --now docker >/dev/null 2>&1
 }
-
+## 安装 Docker Compose
+function install_docker_compose() {
+    if [[ "${INSTALL_DOCKER_COMPOSE}" == "true" ]]; then
+        echo -e "\n$WORKING 正在安装最新版本的 Docker Compose...\n"
+        local latest_version=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d '"' -f 4)
+        curl -L "https://github.com/docker/compose/releases/download/${latest_version}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        chmod +x /usr/local/bin/docker-compose
+        ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+        echo -e "\n$COMPLETE Docker Compose 安装完成，版本：${latest_version}"
+    fi
+}
 ## 查看版本并验证安装结果
 function check_version() {
     if [ -x /usr/bin/docker ]; then
