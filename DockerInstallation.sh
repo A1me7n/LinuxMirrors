@@ -4,7 +4,6 @@
 ## License: MIT
 ## GitHub: https://github.com/SuperManito/LinuxMirrors
 ## Website: https://linuxmirrors.cn
-
 ## Docker CE 软件源列表
 # 格式："软件源名称@软件源地址"
 mirror_list_docker_ce=(
