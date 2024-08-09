@@ -5,7 +5,7 @@
 ## GitHub: https://github.com/SuperManito/LinuxMirrors
 ## Website: https://linuxmirrors.cn
 ## Docker CE 软件源列表
-# 格式："软件源名称@软件源地址"
+## 格式："软件源名称@软件源地址"
 mirror_list_docker_ce=(
     "阿里云@mirrors.aliyun.com/docker-ce"
     "腾讯云@mirrors.tencent.com/docker-ce"
